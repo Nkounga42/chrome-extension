@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Div qui suit la souris</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            cursor: none; /* Cache le curseur par défaut */
+            overflow: hidden; /* Empêche le défilement */
+            background-color: #f0f0f0;
+        }
+        
+        .follower {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #6200ea;
+            border-radius: 50%;
+          
+            transform: translate(-50%, -50%);
+            mix-blend-mode: multiply;
+            transition: 
+                width 0.3s ease,
+                height 0.3s ease,
+                background-color 0.3s ease;
+        }
+        
+        .follower.active {
+            width: 60px;
+            height: 60px;
+            background-color: #ff3c00;
+        }
+        
+        .follower::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="follower" id="mouseFollower"></div>
+
+    <script>
+        const follower = document.getElementById('mouseFollower');
+        
+        // Position initiale au centre
+        let posX = window.innerWidth / 2;
+        let posY = window.innerHeight / 2;
+        follower.style.left = `${posX}px`;
+        follower.style.top = `${posY}px`;
+        
+        // Suivre la souris
+        document.addEventListener('mousemove', (e) => {
+            posX = e.clientX;
+            posY = e.clientY;
+            
+            follower.style.left = `${posX}px`;
+            follower.style.top = `${posY}px`;
+        });
+        
+        // Effet au clic
+        document.addEventListener('mousedown', () => {
+            follower.classList.add('active');
+        });
+        
+        document.addEventListener('mouseup', () => {
+            follower.classList.remove('active');
+        });
+        
+        // Resize handling
+        window.addEventListener('resize', () => {
+            follower.style.left = `${posX}px`;
+            follower.style.top = `${posY}px`;
+        });
+    </script>
+</body>
+</html>

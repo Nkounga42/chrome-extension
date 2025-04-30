@@ -1,0 +1,226 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --background-image: url("https://images.pexels.com/photos/1933239/pexels-photo-1933239.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
+
+  /* light */
+  --text-color-light: #ffffff;
+  --border-color-light: rgba(245, 245, 245, 0.439);
+  --shadow-color-light: rgba(245, 245, 245, 0.439);
+  --text-color-light-50: #ffffffbd;
+  --background-color-light: #e9e9e9;
+  --background-color-light-50: rgba(255, 255, 255, 0.301);
+
+  /* dark */
+  --text-color-dark: rgb(39, 39, 39);
+  --shadow-color-dark: rgba(12, 12, 12, 0.439);
+  --border-color-dark: rgba(12, 12, 12, 0.439);
+  --text-color-dark-50: rgba(51, 51, 51, 0.741);
+  --background-color-dark: rgb(17, 17, 17);
+  --background-color-dark-50: rgba(17, 17, 17, 0.439);
+ 
+
+  --blur: blur(10px);
+  --bg-blur: blur(10px);
+  --border-radius: 0px;
+  --font-weight: 600;
+
+  --font: "Inter", inter;
+}
+
+body {
+  background: var(--background-image) no-repeat center center fixed;
+  background-size: cover;
+}
+
+#modal {
+  background: var(--background-color-dark-50);
+}
+.sideBar,
+.modal-content,
+.delete-button,
+.autocomplete-suggestions,
+.google-services-container,
+.grid-item, 
+.search-container {
+  backdrop-filter: var(--blur);
+}
+.layer {
+  backdrop-filter: var(--bg-blur);
+}
+.controls,
+.options, 
+.option {
+  border-radius: calc(var(--border-radius) / 5) ;
+
+}
+.dark {
+  .modal-buttons button:hover { 
+    color: var(--primary);
+  }
+  .modal-buttons button,
+  #editableLink,
+  .description,
+  .grid-item,
+  .autocomplete-suggestions,
+  .google-services a,
+  .google-services-container .alt-btn,
+  .search-container .clear-button svg,
+  input::placeholder,
+  footer {
+    color: var(--text-color-light-50);
+  }
+
+  .delete-button {
+    box-shadow: 0 0 8px -3px var(--shadow-color-dark);
+  }
+
+  .modal-buttons button:hover,
+  .grid-item,
+  .google-services a:hover,
+  .google-services-container .alt-btn:hover {
+    color: var(--text-color-light);
+  } 
+  .modal-content,
+  #editableLink,
+  .search-container,
+  .grid-item,
+  .google-services-container {
+    border: 1px solid var(--border-color-dark);
+  }
+
+  .delete-button,
+  #tiles-container .grid-item img,
+  .grid-item,
+  .search-container button,
+  .search-container {
+    border-radius: var(--border-radius);
+  }
+
+  .sideBar,
+  #editableLink,
+  .modal-content,
+  #modal,
+  .suggestion-item.selected,
+  .suggestion-item:hover,
+  .grid-item,
+  .google-services-container,
+  .search-container button,
+  .layerr,
+  .search-container,
+ 
+  .autocomplete-suggestions {
+    background: var(--background-color-dark-50);
+  }
+
+  .delete-button,
+  .grid-item:hover,
+  .search-container input[type="text"],
+  .search-container button,
+  .search-container .clear-button:hover svg,
+  a,
+  footer button,
+  .suggestion-item.selected,
+  .suggestion-item:hover {
+    color: var(--text-color-light);
+  }
+
+ 
+  .search-container button:hover,
+  .grid-item:hover,
+  .delete-button {
+    background: var(--background-color-dark);
+  }
+
+  .date-output .clock {
+    font-weight: var(--font-weight);
+  }
+}
+
+.light {
+  .modal-buttons button:hover {
+    color: var(--primary-light);
+  }
+
+  .modal-buttons button{
+    color: var(--text-color-light-50);
+  }
+
+  #editableLink,
+  .grid-item,
+  .autocomplete-suggestions,
+  .google-services a,
+  .google-services-container .alt-btn,
+  
+  a,
+  footer button,
+  footer {
+    color: var(--text-color-light-50);
+  }
+ 
+  .description,
+  .grid-item,
+  header a:hover ,
+  footer button:hover, header a:hover *,
+  .google-services a:hover,
+  .google-services-container .alt-btn:hover {
+    color: var(--text-color-light);
+  } 
+  .modal-content,
+  #editableLink,
+  .search-container,
+  .grid-item,
+  .google-services-container {
+    border: 1px solid var(--border-color-light);
+  }
+
+  .delete-button {
+    box-shadow: 0 0 8px -3px var(--shadow-color-light);
+  }
+
+  .delete-button,
+  #tiles-container .grid-item img,
+  .grid-item,
+  .search-container button,
+  .search-container {
+    border-radius: var(--border-radius);
+  }
+
+  #editableLink,
+  .modal-content,
+  .suggestion-item.selected,
+  .suggestion-item:hover,
+  .grid-item,
+  .google-services-container,   
+  .autocomplete-suggestions {
+    background: var(--background-color-light-50);
+  } 
+  
+  .search-container  {
+    background: var(--background-color-light);
+  }
+
+  .grid-item:hover *,
+  input::placeholder,
+  .search-container:hover input[type="text"],
+  .delete-button, 
+  .search-container input[type="text"],
+  .search-container button, 
+  .suggestion-item.selected,
+  .suggestion-item:hover {
+    color: var(--text-color-dark);
+  }
+  
+ 
+  .grid-item:hover,
+  .delete-button {
+    background: var(--background-color-light);
+  } 
+  .search-container .clear-button:hover svg,
+  .search-container button:hover svg{
+    stroke: var(--text-color-dark);
+  }
+  .date-output .clock {
+    font-weight: var(--font-weight);
+  }
+}

@@ -1,0 +1,43 @@
+:root{
+  --layer-black-50 : rgba(0, 0, 0, 0.37);
+  --layer-black-100 : rgba(0, 0, 0, 0.27);
+  --layer-light-50 : rgba(255, 255, 255, 0.37);
+  --layer-light-100 : rgba(255, 255, 255, 0.27);
+}
+
+
+.follower {
+  position: fixed;
+  z-index: -1;
+  width: 100px;
+  height: 100px;
+  background-color: var(--layer-black-100);
+  border-radius: 50%;
+  filter: blur(50px) ;
+  transform: translate(-50%, -50%) scale(1); 
+  mix-blend-mode: multiply;
+  transition: 
+    width 0.3s ease,
+    height 0.3s ease,
+    background-color 0.3s ease,
+    opacity 0.3s ease, 
+    transform 0.2s ease;
+}
+
+.follower.active {
+  width: 60px;
+  height: 60px;
+  background-color: #ff6060;
+}
+
+.follower::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background-color: var(--layer-black-50);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}

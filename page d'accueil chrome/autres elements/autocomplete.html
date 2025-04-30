@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion de l'Historique personnalisé</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #info, #historyLinks {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+    a {
+      display: block;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Historique personnalisé</h1>
+
+  <button id="backButton">⬅️ Revenir en arrière</button>
+  <button id="forwardButton">➡️ Avancer</button>
+
+  <div id="info"></div>
+  <div id="historyLinks"></div>
+
+  <script>
+    // Tableau pour stocker les liens visités
+    const customHistory = [];
+
+    function updateCustomHistory() {
+      const url = window.location.href;
+      if (customHistory[customHistory.length - 1] !== url) {
+        customHistory.push(url);
+      }
+      displayCustomHistory();
+    }
+
+    function displayCustomHistory() {
+      const container = document.getElementById("historyLinks");
+      container.innerHTML = "<h2>Liens visités :</h2>";
+      customHistory.forEach(link => {
+        container.innerHTML += `<a href="${link}">${link}</a>`;
+      });
+    }
+
+    if (window.history) {
+      document.getElementById("info").innerText = "Nombre de pages dans l'historique : " + window.history.length;
+
+      document.getElementById("backButton").addEventListener("click", () => {
+        window.history.back();
+      });
+
+      document.getElementById("forwardButton").addEventListener("click", () => {
+        window.history.forward();
+      });
+
+      // Mettre à jour l'historique personnalisé au chargement
+      updateCustomHistory();
+    } else {
+      document.getElementById("info").innerText = "L'API History n'est pas supportée sur ce navigateur.";
+    }
+  </script>
+
+</body>
+</html>

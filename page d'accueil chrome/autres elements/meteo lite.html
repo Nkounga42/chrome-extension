@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Widget Météo</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+      }
+      .weather-widget .icon,
+      .weather-widget {
+        display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+      .weather-widget {
+         width: fit-content;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        margin: 20px auto;
+        text-align: center;
+      }
+.description {
+        text-align: left;
+        margin-right: 1rem;
+      } 
+        #desc{
+        font-size: .85rem;
+        color: #3333338a;
+      }
+      #location{
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+      }
+      .weather-widget .temp {
+        font-size: 2.5rem;
+        color: #3a0ca3;
+        font-weight: bold;
+        margin-inline: 1rem;
+
+      }
+
+      .weather-widget .icon {
+        font-size: 3rem;
+      }
+
+      .weather-widget input {
+        width: 80%;
+        padding: 5px 10px;
+        margin-top: 10px;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+        outline: none;
+      }
+
+      .weather-widget label {
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="weather-widget">
+      <div class="icon" id="icon">☁️</div>
+      <div class="temp" id="temp">--°C</div>
+      <div class="description">
+        <div id="location">Chargement...</div>
+        <div id="desc">--</div>
+
+      </div>
+      </div>
+      <input type="text" id="cityInput" placeholder="Changer de ville..." />
+      <label> <input type="checkbox" id="unitToggle" /> Afficher en °F </label>
+
+    <script>
+      const locationEl = document.getElementById("location");
+      const tempEl = document.getElementById("temp");
+      const iconEl = document.getElementById("icon");
+      const descEl = document.getElementById("desc");
+      const inputEl = document.getElementById("cityInput");
+      const toggleEl = document.getElementById("unitToggle");
+
+      let currentTempC = null;
+
+      inputEl.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          fetchWeather(inputEl.value.trim());
+          inputEl.value = "";
+        }
+      });
+
+      toggleEl.addEventListener("change", () => {
+        if (currentTempC !== null) updateTempDisplay();
+      });
+
+      const getWeatherIcon = (code) => {
+        if (code === 0) return "day_forecast_sun_sunny_weather_icon.png"
+        if (code <= 3) return "cloud_cloudy_day_forecast_sun_icon.png"
+        if (code <= 48) return "cloud_clouds_cloudy_forecast_weather_icon.png"
+        if (code <= 65) return "cloud_cloudy_forecast_rain_sun_icon.png"
+        if (code <= 77) return "cloud_cloudy_hail_hail stones_snow_icon.png"
+        if (code <= 86) return "cloud_cloudy_forecast_precipitation_snow_icon.png"
+        if (code <= 99) return "cloud_light bolt_lightning_rain_storm_icon.png"
+        return "❓";
+      };
+
+      const getDescription = (code) => {
+        const map = {
+          0: "Ensoleillé",
+          1: "Peu nuageux",
+          2: "Partiellement nuageux",
+          3: "Nuageux",
+          45: "Brouillard",
+          48: "Brouillard givrant",
+          51: "Bruine",
+          61: "Pluie",
+          71: "Neige",
+          80: "Averses",
+          95: "Orage",
+        };
+        return map[code] || "Inconnu";
+      };
+
+      function updateTempDisplay() {
+        const isF = toggleEl.checked;
+        const temp = isF ? (currentTempC * 9) / 5 + 32 : currentTempC;
+        tempEl.textContent = `${temp.toFixed(1)}°${isF ? "F" : "C"}`;
+      }
+
+      async function fetchWeather(city = "Paris") {
+        try {
+          const geoRes = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+              city
+            )}&count=1&language=fr`
+          );
+          const geo = await geoRes.json();
+          if (!geo.results) throw new Error("Ville introuvable");
+
+          const { latitude, longitude, name } = geo.results[0];
+
+          const weatherRes = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weathercode&timezone=auto`
+          );
+          const weather = await weatherRes.json();
+
+          const now = new Date();
+          const hour = now.getHours();
+          const index = weather.hourly.time.findIndex(
+            (t) => new Date(t).getHours() === hour
+          );
+
+          currentTempC = weather.hourly.temperature_2m[index];
+          const code = weather.hourly.weathercode[index];
+
+          locationEl.textContent = name;
+          iconEl.innerHTML = '<img src="assets/weather icons/lite/' + getWeatherIcon(code)  + '" alt="Weather icon"> ';
+          descEl.textContent = getDescription(code);
+          updateTempDisplay();
+          console.log(iconEl.innerHTML);
+        } catch (err) {
+          locationEl.textContent = "Erreur";
+          // tempEl.textContent = "--°C";
+          // iconEl.textContent = "❓";
+          // descEl.textContent = err.message;
+        }
+      }
+
+      fetchWeather(); // initialisation
+    </script>
+  </body>
+</html>

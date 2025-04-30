@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Détection de la ville</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #282c34;
+      color: white;
+      gap: 20px;
+    }
+    .info {
+      font-size: 1.5rem;
+    }
+    .error {
+      color: #ff5555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Détection de votre Ville 🌍</h1>
+  <div class="info" id="city">Détection en cours...</div>
+
+  <script>
+    function getCityFromCoordinates(latitude, longitude) {
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
+        .then(response => response.json())
+        .then(data => {
+          const city = data.address.city || data.address.town || data.address.village || data.address.hamlet;
+          if (city) {
+            return city
+          } else {
+            return "Ville non trouvée";
+          }
+        })
+        .catch(err => {
+          console.error('Erreur lors du reverse geocoding', err);
+          // document.getElementById('city').innerHTML = '<span class="error">Erreur lors de la détection de la ville.</span>';
+        });
+    }
+
+    function success(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      console.log(`Latitude : ${latitude}, Longitude : ${longitude}`);
+      getCityFromCoordinates(latitude, longitude);
+    }
+
+    function error(err) {
+      console.error(`Erreur de géolocalisation : ${err.message}`);
+      // document.getElementById('city').innerHTML = '<span class="error">Impossible d\'accéder à votre position.</span>';
+    }
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+      // document.getElementById('city').innerHTML = '<span class="error">La géolocalisation n\'est pas supportée par votre navigateur.</span>';
+    }
+  </script>
+
+</body>
+</html>
