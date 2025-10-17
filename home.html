@@ -36,9 +36,7 @@
             </div>
             <div class="header-content">
               <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl">Gmail</a>
-              <a href="https://www.google.com/imghp?hl=fr&tab=ri&ogbl"
-                >Images</a
-              >
+              <a href="https://www.google.com/imghp?hl=fr&tab=ri&ogbl" >Images</a >
               <a id="toggle-button" href="#"
                 ><svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -209,14 +207,16 @@
             </div>
 
             <div class="search-container">
-              <input
+             <input
                 type="text"
                 class="search-input"
                 id="search-input"
                 placeholder="Effectuez une recherche sur Google ou saisissez une URL"
-                autocomplete="off"
+                autocomplete="true"
                 spellcheck="false"
-              />
+              />  
+             
+             
               <button class="clear-button" id="clear-button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -251,6 +251,16 @@
                   <path d="m21 21-4.3-4.3" />
                 </svg>
               </button>
+               <div id="ai-indicator" class="ai-indicator inactive">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot">
+                  <path d="M12 8V4H8"/>
+                  <rect width="16" height="12" x="4" y="8" rx="2"/>
+                  <path d="M2 14h2"/>
+                  <path d="M20 14h2"/>
+                  <path d="M15 13v2"/>
+                  <path d="M9 13v2"/>
+                </svg>
+              </div>
               <div class="follower" id="mouseFollower"></div>
             </div>
 
@@ -449,9 +459,31 @@
               </select>
             </div>
           </div>
+          <div class="controls">
+            <h2>Intelligence Artificielle</h2>
+            <div class="checkbox-container">
+              <label for="ai-engine-select">Choisir un assistant IA :</label>
+              <select id="ai-engine-select">
+                <option value="chatgpt">ChatGPT</option>
+                <option value="claude">Claude</option>
+                <option value="gemini">Gemini (Bard)</option>
+                <option value="copilot">Microsoft Copilot</option>
+                <option value="perplexity">Perplexity</option>
+                <option value="you">You.com</option>
+                <option value="phind">Phind</option>
+              </select>
+            </div>
+            <div class="checkbox-container">
+              Mode IA activé
+              <label for="ai-mode-toggle" class="ios-switch">
+                <input type="checkbox" id="ai-mode-toggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
           <div class="controls"> 
             <h2>
-              Changer les bordures arrondies
+              Bordures arrondies
             </h2>
             <div class="checkbox-container">
               Activer le border-radius

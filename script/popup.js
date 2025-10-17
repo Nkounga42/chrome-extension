@@ -95,6 +95,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Charger le moteur de recherche sauvegardé
   await loadSearchEngineSettings();
+  
+  // Charger les paramètres IA sauvegardés
+  await loadAiSettings();
 
   // Charger aussi les favoris par défaut si besoin
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -290,16 +293,37 @@ const searchEngines = {
   qwant: "https://www.qwant.com/?q="
 };
 
+// Configuration des assistants IA
+const aiEngines = {
+  chatgpt: "https://chat.openai.com/?q=",
+  claude: "https://claude.ai/chat?q=",
+  gemini: "https://gemini.google.com/app?q=",
+  copilot: "https://copilot.microsoft.com/?q=",
+  perplexity: "https://www.perplexity.ai/search?q=",
+  you: "https://you.com/search?q=",
+  phind: "https://www.phind.com/search?q="
+};
+
 function submitForm(target) {
   if (target.startsWith("http://") || target.startsWith("https://")) {
     window.open(target, "_blank"); // Ouvre les URLs complètes dans un nouvel onglet
   } else if (target.startsWith("www.")) {
     window.open("https://" + target, "_blank"); // Ouvre les www. dans un nouvel onglet
   } else if (target.length > 0) {
-    // Utiliser le moteur de recherche sélectionné
-    const selectedEngine = getSelectedSearchEngine();
-    const searchUrl = searchEngines[selectedEngine] + encodeURIComponent(target);
-    window.location.href = searchUrl;
+    // Vérifier si le mode IA est activé
+    const isAiModeEnabled = getAiModeStatus();
+    
+    if (isAiModeEnabled) {
+      // Utiliser l'assistant IA sélectionné
+      const selectedAi = getSelectedAiEngine();
+      const aiUrl = getAiUrl(selectedAi, target);
+      window.open(aiUrl, "_blank"); // Ouvrir l'IA dans un nouvel onglet
+    } else {
+      // Utiliser le moteur de recherche sélectionné
+      const selectedEngine = getSelectedSearchEngine();
+      const searchUrl = searchEngines[selectedEngine] + encodeURIComponent(target);
+      window.location.href = searchUrl;
+    }
   }
 }
 
@@ -307,6 +331,39 @@ function submitForm(target) {
 function getSelectedSearchEngine() {
   const searchEngineSelect = document.getElementById("search-engine-select");
   return searchEngineSelect ? searchEngineSelect.value : "google";
+}
+
+// Fonction pour récupérer l'assistant IA sélectionné
+function getSelectedAiEngine() {
+  const aiEngineSelect = document.getElementById("ai-engine-select");
+  return aiEngineSelect ? aiEngineSelect.value : "chatgpt";
+}
+
+// Fonction pour vérifier si le mode IA est activé
+function getAiModeStatus() {
+  const aiModeToggle = document.getElementById("ai-mode-toggle");
+  return aiModeToggle ? aiModeToggle.checked : false;
+}
+
+// Fonction pour générer l'URL de l'assistant IA
+function getAiUrl(aiEngine, query) {
+  const baseUrls = {
+    chatgpt: "https://chat.openai.com/",
+    claude: "https://claude.ai/",
+    gemini: "https://gemini.google.com/app",
+    copilot: "https://copilot.microsoft.com/",
+    perplexity: "https://www.perplexity.ai/search?q=" + encodeURIComponent(query),
+    you: "https://you.com/search?q=" + encodeURIComponent(query),
+    phind: "https://www.phind.com/search?q=" + encodeURIComponent(query)
+  };
+  
+  // Pour certains assistants, on ne peut pas passer directement la query dans l'URL
+  // donc on ouvre juste la page principale
+  if (["chatgpt", "claude", "gemini", "copilot"].includes(aiEngine)) {
+    return baseUrls[aiEngine];
+  }
+  
+  return baseUrls[aiEngine] || baseUrls.chatgpt;
 }
 
 // Fonction pour sauvegarder le moteur de recherche sélectionné
@@ -335,6 +392,120 @@ async function loadSearchEngineSettings() {
     }
   } catch (error) {
     console.error('❌ Erreur chargement moteur de recherche:', error);
+  }
+}
+
+// Fonction pour sauvegarder les paramètres IA
+async function saveAiSettings() {
+  const selectedAi = getSelectedAiEngine();
+  const aiModeEnabled = getAiModeStatus();
+  const settings = await storageManager.loadSettings();
+  
+  settings.aiEngine = selectedAi;
+  settings.aiModeEnabled = aiModeEnabled;
+  
+  await storageManager.saveSettings(settings);
+  
+  // Mettre à jour l'indicateur IA et le placeholder
+  updateAiIndicator();
+  updateSearchPlaceholder();
+  
+  console.log('🤖 Paramètres IA sauvegardés:', { engine: selectedAi, enabled: aiModeEnabled });
+}
+
+// Fonction pour charger les paramètres IA
+async function loadAiSettings() {
+  try {
+    const settings = await storageManager.loadSettings();
+    const savedAi = settings.aiEngine || 'chatgpt';
+    const aiModeEnabled = settings.aiModeEnabled || false;
+    
+    const aiEngineSelect = document.getElementById("ai-engine-select");
+    const aiModeToggle = document.getElementById("ai-mode-toggle");
+    
+    if (aiEngineSelect) {
+      aiEngineSelect.value = savedAi;
+      aiEngineSelect.addEventListener('change', saveAiSettings);
+    }
+    
+    if (aiModeToggle) {
+      aiModeToggle.checked = aiModeEnabled;
+      aiModeToggle.addEventListener('change', saveAiSettings);
+    }
+    
+    // Mettre à jour l'interface après le chargement
+    updateAiIndicator();
+    updateSearchPlaceholder();
+    
+    console.log('✅ Paramètres IA chargés:', { engine: savedAi, enabled: aiModeEnabled });
+  } catch (error) {
+    console.error('❌ Erreur chargement paramètres IA:', error);
+  }
+}
+
+// Fonction pour mettre à jour l'indicateur IA
+function updateAiIndicator() {
+  const aiIndicator = document.getElementById("ai-indicator");
+  const isAiModeEnabled = getAiModeStatus();
+  const selectedAi = getSelectedAiEngine();
+  
+  if (aiIndicator) {
+    const aiIcons = {
+      chatgpt: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>',
+      claude: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brain"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>',
+      gemini: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>',
+      copilot: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plane"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+      perplexity: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+      you: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+      phind: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>'
+    };
+    
+    // Toujours afficher l'indicateur, mais changer son apparence selon l'état
+    aiIndicator.innerHTML = aiIcons[selectedAi] || aiIcons.chatgpt;
+    aiIndicator.style.display = "flex";
+    
+    // Changer l'apparence selon l'état du mode IA
+    if (isAiModeEnabled) {
+      aiIndicator.classList.add('active');
+      aiIndicator.classList.remove('inactive');
+    } else {
+      aiIndicator.classList.add('inactive');
+      aiIndicator.classList.remove('active');
+    }
+  }
+}
+
+// Fonction pour mettre à jour le placeholder de recherche
+function updateSearchPlaceholder() {
+  const searchInput = document.getElementById("search-input");
+  const isAiModeEnabled = getAiModeStatus();
+  const selectedAi = getSelectedAiEngine();
+  const selectedEngine = getSelectedSearchEngine();
+  
+  if (searchInput) {
+    if (isAiModeEnabled) {
+      const aiNames = {
+        chatgpt: "ChatGPT",
+        claude: "Claude",
+        gemini: "Gemini",
+        copilot: "Copilot",
+        perplexity: "Perplexity",
+        you: "You.com",
+        phind: "Phind"
+      };
+      searchInput.placeholder = `Posez votre question à ${aiNames[selectedAi] || "l'IA"}`;
+    } else {
+      const engineNames = {
+        google: "Google",
+        bing: "Bing",
+        duckduckgo: "DuckDuckGo",
+        yahoo: "Yahoo",
+        ecosia: "Ecosia",
+        startpage: "Startpage",
+        qwant: "Qwant"
+      };
+      searchInput.placeholder = `Effectuez une recherche sur ${engineNames[selectedEngine] || "Google"} ou saisissez une URL`;
+    }
   }
 }
 // Déclaration des éléments une seule fois pour de meilleures performances
@@ -704,5 +875,37 @@ confirmDeleteModal.addEventListener("click", function(e) {
   if (e.target === confirmDeleteModal) {
     confirmDeleteModal.style.display = "none";
     itemToDelete = null;
+  }
+});
+
+// Gestion du clic sur l'indicateur IA pour basculer le mode IA
+document.addEventListener('DOMContentLoaded', () => {
+  const aiIndicator = document.getElementById('ai-indicator');
+  
+  if (aiIndicator) {
+    aiIndicator.addEventListener('click', () => {
+      const currentStatus = getAiModeStatus();
+      const newStatus = !currentStatus;
+      
+      // Sauvegarder le nouveau statut
+      if (typeof saveAiModeStatus === 'function') {
+        saveAiModeStatus(newStatus);
+      }
+      
+      // Mettre à jour le toggle dans les paramètres
+      const aiModeToggle = document.getElementById('ai-mode-toggle');
+      if (aiModeToggle) {
+        aiModeToggle.checked = newStatus;
+      }
+      
+      // Mettre à jour l'affichage
+      updateAiIndicator();
+      updateSearchPlaceholder();
+      
+      console.log('🔄 Mode IA basculé:', newStatus ? 'Activé' : 'Désactivé');
+    });
+    
+    // Ajouter un style de curseur pointer pour indiquer que c'est cliquable
+    aiIndicator.style.cursor = 'pointer';
   }
 });
