@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Home Space",
+  "description" :"Personnalisez votre nouvelle page d’onglet avec une interface élégante, utile et inspirante." ,
+ 
+  "version": "1.0.0",
+  "permissions": [
+    "bookmarks", 
+    "contextMenus" ,
+    "history",
+    "windows"
+  ],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  }, 
+  "chrome_url_overrides": {
+    "newtab": "home.html"
+  }, 
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
