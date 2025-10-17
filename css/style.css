@@ -417,7 +417,7 @@ footer .copyright {
 
 #drop-area {
   border: 2px dashed var(--border-color-light);
-  border-radius: var(--border-radius);
+  border-radius: calc(var(--border-radius) / 3);
   width: 100%;
   min-height: 120px;
   text-align: center;

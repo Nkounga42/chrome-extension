@@ -69,7 +69,7 @@ class DragAndDropContainer {
     if (this.placeholder.parentNode && this.draggedItem) {
       this.container.insertBefore(this.draggedItem, this.placeholder);
       this.placeholder.parentNode.removeChild(this.placeholder);
-      saveFavoritesToLocalStorage(); // Sauvegarde à chaque drop
+      saveFavoritesToStorage(); // Sauvegarde à chaque drop
     }
   }
 

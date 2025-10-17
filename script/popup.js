@@ -61,13 +61,40 @@ let itemToDelete = null;
 let selectedIndex = -1; // Aucune sélection au début
 let currentMatches = []; // Stocker les suggestions actuelles
 
-document.addEventListener("DOMContentLoaded", function () {
-  // Charger les favoris sauvegardés au démarrage
-  const savedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
+document.addEventListener("DOMContentLoaded", async function () {
+  // Attendre un peu que l'extension soit complètement chargée
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  // Vérifier et effectuer la migration si nécessaire
+  try {
+    const migrationCompleted = await storageManager.isMigrationCompleted();
+    if (!migrationCompleted) {
+      await storageManager.migrateFromLocalStorage();
+    }
+  } catch (error) {
+    console.error('❌ Erreur lors de la vérification de migration:', error);
+  }
 
-  savedFavorites.forEach((url) => {
-    parentElement.appendChild(createItem(url));
-  });
+  // Charger les favoris sauvegardés au démarrage
+  const savedFavorites = await storageManager.loadFavorites();
+
+  // Si aucun favori sauvegardé, charger les favoris par défaut
+  if (savedFavorites.length === 0) {
+    links.forEach((link, index) => {
+      if (index <= 5) {
+        parentElement.appendChild(createItem(link.url));
+      }
+    });
+    // Sauvegarder les favoris par défaut
+    await saveFavoritesToStorage();
+  } else {
+    savedFavorites.forEach((url) => {
+      parentElement.appendChild(createItem(url));
+    });
+  }
+
+  // Charger le moteur de recherche sauvegardé
+  await loadSearchEngineSettings();
 
   // Charger aussi les favoris par défaut si besoin
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -94,14 +121,8 @@ function processBookmarks(bookmarkNodes, parentElement) {
     }
   });
 }
-const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-if (favorites.length === 0) {
-  links.forEach((link, index) => {
-    if (index <= 5) {
-      parentElement.appendChild(createItem(link.url));
-    }
-  });
-}
+// Chargement des favoris par défaut si aucun favori n'existe (géré dans DOMContentLoaded)
+// Cette section sera exécutée après le chargement des favoris sauvegardés
 
 // Fonction pour extraire le domaine d'une URL
 function extractDomain(input) {
@@ -258,15 +279,62 @@ searchButton.addEventListener("click", function () {
   submitForm(target);
 });
 
+// Configuration des moteurs de recherche
+const searchEngines = {
+  google: "https://www.google.com/search?q=",
+  bing: "https://www.bing.com/search?q=",
+  duckduckgo: "https://duckduckgo.com/?q=",
+  yahoo: "https://search.yahoo.com/search?p=",
+  ecosia: "https://www.ecosia.org/search?q=",
+  startpage: "https://www.startpage.com/sp/search?query=",
+  qwant: "https://www.qwant.com/?q="
+};
+
 function submitForm(target) {
   if (target.startsWith("http://") || target.startsWith("https://")) {
     window.open(target, "_blank"); // Ouvre les URLs complètes dans un nouvel onglet
   } else if (target.startsWith("www.")) {
     window.open("https://" + target, "_blank"); // Ouvre les www. dans un nouvel onglet
   } else if (target.length > 0) {
-    // Redirection dans le même onglet pour les recherches Google
-    window.location.href =
-      "https://www.google.com/search?q=" + encodeURIComponent(target);
+    // Utiliser le moteur de recherche sélectionné
+    const selectedEngine = getSelectedSearchEngine();
+    const searchUrl = searchEngines[selectedEngine] + encodeURIComponent(target);
+    window.location.href = searchUrl;
+  }
+}
+
+// Fonction pour récupérer le moteur de recherche sélectionné
+function getSelectedSearchEngine() {
+  const searchEngineSelect = document.getElementById("search-engine-select");
+  return searchEngineSelect ? searchEngineSelect.value : "google";
+}
+
+// Fonction pour sauvegarder le moteur de recherche sélectionné
+async function saveSearchEngineSettings() {
+  const selectedEngine = getSelectedSearchEngine();
+  const settings = await storageManager.loadSettings();
+  settings.searchEngine = selectedEngine;
+  await storageManager.saveSettings(settings);
+  console.log('💾 Moteur de recherche sauvegardé:', selectedEngine);
+}
+
+// Fonction pour charger les paramètres du moteur de recherche
+async function loadSearchEngineSettings() {
+  try {
+    const settings = await storageManager.loadSettings();
+    const savedEngine = settings.searchEngine || 'google';
+    
+    const searchEngineSelect = document.getElementById("search-engine-select");
+    if (searchEngineSelect) {
+      searchEngineSelect.value = savedEngine;
+      
+      // Ajouter l'événement de changement
+      searchEngineSelect.addEventListener('change', saveSearchEngineSettings);
+      
+      console.log('✅ Moteur de recherche chargé:', savedEngine);
+    }
+  } catch (error) {
+    console.error('❌ Erreur chargement moteur de recherche:', error);
   }
 }
 // Déclaration des éléments une seule fois pour de meilleures performances
@@ -317,13 +385,18 @@ function deleteItem(key) {
 
   if (elem) {
     elem.remove();
-    saveFavoritesToLocalStorage();
+    saveFavoritesToStorage();
   }
 }
-function saveFavoritesToLocalStorage() {
+async function saveFavoritesToStorage() {
   const items = Array.from(parentElement.querySelectorAll(".fav-link a"));
   const urls = items.map((item) => item.href);
-  localStorage.setItem("favorites", JSON.stringify(urls));
+  
+  // Sauvegarder avec le nouveau système
+  await storageManager.saveFavorites(urls);
+  
+  // Feedback visuel optionnel
+  console.log('💾 Favoris sauvegardés:', urls.length, 'éléments');
 }
 
 function createItem(url) {
@@ -372,7 +445,7 @@ function createFavoriteLink() {
   let link = searchInput.value.trim().toLowerCase();
   const newItem = createItem(link);
   parentElement.appendChild(newItem);
-  saveFavoritesToLocalStorage();
+  saveFavoritesToStorage();
 }
 
 // Ouvrir la modale
@@ -445,7 +518,7 @@ function validerEtCreer() {
   ) {
     const newItem = createItem(text);
     parentElement.appendChild(newItem);
-    saveFavoritesToLocalStorage();
+    saveFavoritesToStorage();
     fermerModal();
   }
   ouvrirModalBtn.style.display =

@@ -302,7 +302,6 @@
                 </div>
               </div>
             </div>
-
             <!-- Modal de confirmation de suppression -->
             <div id="confirmDeleteModal" draggable="false">
               <div class="modal-content">
@@ -322,11 +321,9 @@
           </div>
           <footer>
             <div class="copyright">
-              <span
-                >© 2025 <a href="mailto:nkoungagil@gmail.com">  Nkounga Exaucé.</a> Tous droits réservés. Version 1.0.0
-                 </span >
+              <span >© 2025 <a href="https://nkounga42.github.io/portfolio/">  Nkounga Exaucé. </a> Tous droits réservés. Version 1.0.1 </span>
             </div>
-            <div id="parametre" hidd en>
+            <div id="parametre" >
               <button class="showParam" id="showParam" title="Paramètres">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -437,6 +434,21 @@
               </select>
             </div>
           </div>
+          <div class="controls">
+            <h2>Moteur de recherche</h2>
+            <div class="checkbox-container">
+              <label for="search-engine-select">Choisir un moteur :</label>
+              <select id="search-engine-select">
+                <option value="google">Google</option>
+                <option value="bing">Bing</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="ecosia">Ecosia</option>
+                <option value="startpage">Startpage</option>
+                <option value="qwant">Qwant</option>
+              </select>
+            </div>
+          </div>
           <div class="controls"> 
             <h2>
               Changer les bordures arrondies
@@ -522,13 +534,15 @@
 
            <div class="copyright">
               <span
-                >© <a href="mailto:nkoungagil@gmail.com"> Home Space</a>, Version 1.0.0
+                >© <a href="mailto:nkoungagil@gmail.com"> Home Space</a>, Version 1.0.1
                  </span >
             </div>
         </div>
       </div>
     </main>
 
+    <script src="/script/chrome-diagnostic.js"></script>
+    <script src="/script/storage-manager.js"></script>
     <script src="/script/time-manager.js"></script>
     <script src="/script/popup.js"></script>
     <script src="/script/draggable.js"></script>

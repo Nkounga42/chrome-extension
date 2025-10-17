@@ -130,17 +130,20 @@ let currentImageData = null;
 const SUPPORTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 
 // Charger l'arrière-plan sauvegardé au démarrage
-function loadSavedBackground() {
-  const savedBg = localStorage.getItem('customBackground');
+async function loadSavedBackground() {
+  const savedBg = await storageManager.loadCurrentBackground();
   if (savedBg) {
     document.body.style.backgroundImage = `url(${savedBg})`;
   }
 }
 
 // Sauvegarder l'arrière-plan
-function saveBackground(imageData) {
+async function saveBackground(imageData) {
   try {
-    localStorage.setItem('customBackground', imageData);
+    const success = await storageManager.saveCurrentBackground(imageData);
+    if (!success) {
+      alert('Erreur lors de la sauvegarde de l\'arrière-plan');
+    }
   } catch (e) {
     console.error('Erreur lors de la sauvegarde:', e);
     alert('Image trop volumineuse pour être sauvegardée');
@@ -244,9 +247,9 @@ applyBgBtn.addEventListener("click", () => {
 });
 
 // Supprimer l'arrière-plan
-removeBgBtn.addEventListener("click", () => {
+removeBgBtn.addEventListener("click", async () => {
   document.body.style.backgroundImage = '';
-  localStorage.removeItem('customBackground');
+  await storageManager.remove(storageManager.storageKeys.CURRENT_BACKGROUND);
   resetBgInterface();
 });
 

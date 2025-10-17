@@ -76,21 +76,21 @@
 
 /* Bouton de confirmation de suppression */
 .delete-confirm-btn {
-  background-color: #dc3545 !important;
+  background-color: #dc35467a !important;
   color: white !important;
   border-radius: calc(var(--border-radius) / 4);
+  margin-inline: 8px;
   transition: background-color 0.2s ease;
 }
 
 .delete-confirm-btn:hover {
-  background-color: #c82333 !important;
+  color: #c82333 !important;
 }
 
 /* Bouton d'annulation */
 #cancelDelete {
   background-color: transparent !important;
-  color: var(--text-color) !important;
-  border: 1px solid var(--border-color, #ccc);
+  color: var(--text-color) !important; 
   border-radius: calc(var(--border-radius) / 4);
   transition: background-color 0.2s ease;
 }
